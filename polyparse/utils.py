@@ -41,3 +41,4 @@ def extract_slug_from_url(url):
 def is_polymarket_url(url):
     return "polymarket.com" in url and "/event/" in url
 
+

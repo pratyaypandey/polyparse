@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
 authors = [
-    {name = "Pratyay Pandey", email = "pratyay@pratyaypandey.com"}
+    {name = "Pratyay Pandey", email = "pratyayrakesh@gmail.com"}
 ]
 keywords = ["polymarket", "scraper", "cli", "selenium", "prediction-markets"]
 classifiers = [

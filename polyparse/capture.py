@@ -144,3 +144,4 @@ def capture_all_network_data(url: str, output_dir: str = "./captures", url_patte
     finally:
         driver.quit()
 
+
