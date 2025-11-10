@@ -14,7 +14,28 @@ A CLI tool that uses Selenium to scrape Polymarket event data, including histori
 
 ## Installation
 
+### Via Homebrew (macOS/Linux)
+
 ```bash
+# Once published to Homebrew
+brew install polyparse
+
+# Or from a custom tap
+brew tap yourusername/polyparse
+brew install polyparse
+```
+
+### Via pip
+
+```bash
+pip install polyparse
+```
+
+### From source
+
+```bash
+git clone https://github.com/yourusername/polyparse.git
+cd polyparse
 pip install -e .
 ```
 
@@ -113,3 +134,28 @@ The tool saves data in JSON format with the following structure:
 - Some data may require authentication to access
 - Historical price data extraction depends on what's available on the page
 
+## Development
+
+### Running Tests
+
+```bash
+pytest
+```
+
+### Building from Source
+
+```bash
+python -m build
+```
+
+## Distribution
+
+For information on how to distribute this package via Homebrew and PyPI, see [DISTRIBUTION.md](DISTRIBUTION.md).
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

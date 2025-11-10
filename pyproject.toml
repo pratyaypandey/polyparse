@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polyparse"
+version = "0.1.0"
+description = "CLI tool to scrape Polymarket event data using Selenium"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["polymarket", "scraper", "cli", "selenium", "prediction-markets"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+
+dependencies = [
+    "selenium>=4.15.0",
+    "webdriver-manager>=4.0.0",
+    "click>=8.1.0",
+    "python-dateutil>=2.8.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+polyparse = "polyparse.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/polyparse"
+Repository = "https://github.com/yourusername/polyparse"
+Issues = "https://github.com/yourusername/polyparse/issues"
+
+[tool.setuptools]
+packages = ["polyparse"]
+
+[tool.setuptools.package-data]
+polyparse = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=polyparse --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
