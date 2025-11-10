@@ -161,16 +161,29 @@ def extract_event_data(driver, url, use_network=True, capture_dir=None, fast_mod
                                                                         outcome_prices = market.get("outcomePrices", [])
                                                                         volume = market.get("volume") or market.get("volumeNum") or market.get("volume_num") or 0
                                                                         liquidity = market.get("liquidity") or market.get("liquidityNum") or market.get("liquidity_num") or volume
-                                                                        
+
+                                                                        # Get the market identifier (candidate name, etc.)
+                                                                        market_name = (market.get("title") or market.get("question") or
+                                                                                     market.get("groupItemTitle") or market.get("token") or
+                                                                                     market.get("ticker") or market.get("name") or
+                                                                                     market.get("description", ""))
+
                                                                         for idx, outcome in enumerate(outcomes):
                                                                             if idx < len(outcome_prices):
                                                                                 try:
                                                                                     price = float(outcome_prices[idx])
                                                                                     if price > 1:
                                                                                         price = price / 100
-                                                                                    
+
+                                                                                    # For multi-candidate markets, prepend candidate name to outcome
+                                                                                    outcome_label = str(outcome)
+                                                                                    if market_name and len(outcomes) > 1 and len(markets_list) > 1:
+                                                                                        # If there are multiple markets with Yes/No outcomes, prefix with market name
+                                                                                        if outcome_label in ["Yes", "No", "Up", "Down"]:
+                                                                                            outcome_label = f"{market_name}"
+
                                                                                     market_obj = {
-                                                                                        "outcome": str(outcome),
+                                                                                        "outcome": outcome_label,
                                                                                         "current_price": price,
                                                                                         "volume": float(volume) if volume else 0.0,
                                                                                         "liquidity": float(liquidity) if liquidity else 0.0,
@@ -204,16 +217,29 @@ def extract_event_data(driver, url, use_network=True, capture_dir=None, fast_mod
                                                                                     outcome_prices = market.get("outcomePrices", [])
                                                                                     volume = market.get("volume") or market.get("volumeNum") or market.get("volume_num") or 0
                                                                                     liquidity = market.get("liquidity") or market.get("liquidityNum") or market.get("liquidity_num") or volume
-                                                                                    
+
+                                                                                    # Get the market identifier (candidate name, etc.)
+                                                                                    market_name = (market.get("title") or market.get("question") or
+                                                                                                 market.get("groupItemTitle") or market.get("token") or
+                                                                                                 market.get("ticker") or market.get("name") or
+                                                                                                 market.get("description", ""))
+
                                                                                     for idx, outcome in enumerate(outcomes):
                                                                                         if idx < len(outcome_prices):
                                                                                             try:
                                                                                                 price = float(outcome_prices[idx])
                                                                                                 if price > 1:
                                                                                                     price = price / 100
-                                                                                                
+
+                                                                                                # For multi-candidate markets, prepend candidate name to outcome
+                                                                                                outcome_label = str(outcome)
+                                                                                                if market_name and len(outcomes) > 1 and len(markets_list) > 1:
+                                                                                                    # If there are multiple markets with Yes/No outcomes, prefix with market name
+                                                                                                    if outcome_label in ["Yes", "No", "Up", "Down"]:
+                                                                                                        outcome_label = f"{market_name}"
+
                                                                                                 market_obj = {
-                                                                                                    "outcome": str(outcome),
+                                                                                                    "outcome": outcome_label,
                                                                                                     "current_price": price,
                                                                                                     "volume": float(volume) if volume else 0.0,
                                                                                                     "liquidity": float(liquidity) if liquidity else 0.0,

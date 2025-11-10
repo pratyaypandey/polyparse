@@ -8,6 +8,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from polyparse.parser import (
     extract_event_metadata,
     extract_market_data,
+    extract_resolved_outcome,
     detect_recurring_event,
     get_past_event_urls,
 )
@@ -76,12 +77,14 @@ class TestMarketDataExtraction:
     def test_extract_with_no_markets(self, mock_driver):
         """Test extraction when no market data is found."""
         mock_driver.find_elements.return_value = []
+        mock_driver.execute_script.return_value = []
 
         with patch('polyparse.parser.WebDriverWait'):
             markets = extract_market_data(mock_driver)
 
         assert isinstance(markets, list)
-        assert len(markets) == 0
+        # Should return at least one market (Unknown as fallback)
+        assert len(markets) >= 1
 
     @pytest.mark.unit
     def test_extract_handles_exceptions_gracefully(self, mock_driver):
@@ -96,6 +99,86 @@ class TestMarketDataExtraction:
             except Exception:
                 # Exception is acceptable
                 pass
+
+
+class TestResolvedOutcomeExtraction:
+    """Tests for resolved outcome extraction."""
+
+    @pytest.mark.unit
+    def test_extract_resolved_with_winning_outcome(self, mock_driver):
+        """Test extraction of winning outcome from resolved market."""
+        mock_driver.execute_script.return_value = {
+            "winning_outcome": "Yes",
+            "markets": ["Yes", "No"]
+        }
+
+        result = extract_resolved_outcome(mock_driver)
+
+        assert result is not None
+        assert result["winning_outcome"] == "Yes"
+        assert "Yes" in result["all_outcomes"]
+        assert "No" in result["all_outcomes"]
+
+    @pytest.mark.unit
+    def test_extract_resolved_without_winner(self, mock_driver):
+        """Test extraction when outcomes are found but no clear winner."""
+        mock_driver.execute_script.return_value = {
+            "winning_outcome": None,
+            "markets": ["Yes", "No"]
+        }
+
+        result = extract_resolved_outcome(mock_driver)
+
+        assert result is not None
+        assert result["winning_outcome"] is None
+        assert len(result["all_outcomes"]) > 0
+
+    @pytest.mark.unit
+    def test_extract_resolved_no_data(self, mock_driver):
+        """Test extraction when no resolved data is found."""
+        mock_driver.execute_script.return_value = {
+            "winning_outcome": None,
+            "markets": []
+        }
+
+        result = extract_resolved_outcome(mock_driver)
+
+        assert result is None
+
+    @pytest.mark.unit
+    def test_extract_resolved_handles_exceptions(self, mock_driver):
+        """Test that resolved extraction handles exceptions gracefully."""
+        mock_driver.execute_script.side_effect = Exception("Script error")
+
+        result = extract_resolved_outcome(mock_driver)
+
+        assert result is None
+
+    @pytest.mark.unit
+    def test_market_data_uses_resolved_outcome(self, mock_driver):
+        """Test that market data extraction uses resolved outcome as fallback."""
+        mock_driver.find_elements.return_value = []
+        mock_driver.execute_script.side_effect = [
+            [],  # First call for regular market data
+            {    # Second call for resolved outcome
+                "winning_outcome": "Yes",
+                "markets": ["Yes", "No"]
+            }
+        ]
+
+        with patch('polyparse.parser.WebDriverWait'):
+            markets = extract_market_data(mock_driver)
+
+        assert isinstance(markets, list)
+        assert len(markets) == 2
+        # Winner should have price 1.0
+        yes_market = next((m for m in markets if m["outcome"] == "Yes"), None)
+        assert yes_market is not None
+        assert yes_market["current_price"] == 1.0
+        # Loser should have price 0.0
+        no_market = next((m for m in markets if m["outcome"] == "No"), None)
+        assert no_market is not None
+        assert no_market["current_price"] == 0.0
 
 
 class TestRecurringEventDetection:

@@ -130,30 +130,112 @@ def extract_market_data_from_network(network_monitor):
     return markets, market_data.get("price_history", [])
 
 
+def extract_resolved_outcome(driver):
+    """Extract the winning outcome from a resolved market."""
+    try:
+        # Look for resolution text patterns
+        resolution_data = driver.execute_script("""
+            var result = {winning_outcome: null, markets: []};
+            var pageText = document.body.innerText || document.body.textContent;
+
+            // Look for explicit resolution statements
+            var resolutionPatterns = [
+                /resolved\\s+(?:to\\s+)?["']?\\s*(Yes|No|Up|Down)\\s*["']?/i,
+                /winner[:\\s]+["']?\\s*(Yes|No|Up|Down)\\s*["']?/i,
+                /winning\\s+outcome[:\\s]+["']?\\s*(Yes|No|Up|Down)\\s*["']?/i,
+                /market\\s+(?:settled|closed)\\s+(?:as|with|at)?\\s+["']?\\s*(Yes|No|Up|Down)\\s*["']?/i
+            ];
+
+            for (var i = 0; i < resolutionPatterns.length; i++) {
+                var match = pageText.match(resolutionPatterns[i]);
+                if (match) {
+                    result.winning_outcome = match[1];
+                    break;
+                }
+            }
+
+            // If not found, look for elements with resolution-related classes/attributes
+            if (!result.winning_outcome) {
+                var resolutionElements = document.querySelectorAll(
+                    '[class*="resolution"], [class*="winner"], [class*="winning"], ' +
+                    '[class*="resolved"], [data-testid*="resolution"], [data-testid*="winner"]'
+                );
+
+                for (var i = 0; i < resolutionElements.length; i++) {
+                    var text = resolutionElements[i].textContent || resolutionElements[i].innerText;
+                    var outcomeMatch = text.match(/\\b(Yes|No|Up|Down)\\b/i);
+                    if (outcomeMatch) {
+                        result.winning_outcome = outcomeMatch[1];
+                        break;
+                    }
+                }
+            }
+
+            // Look for all possible outcomes to return both winner and loser
+            var allElements = document.querySelectorAll('button, [role="button"], div, span, p');
+            var seenOutcomes = {};
+
+            for (var i = 0; i < allElements.length; i++) {
+                var elem = allElements[i];
+                var text = elem.textContent || elem.innerText;
+                if (!text || text.length > 200) continue;
+
+                var outcomeMatch = text.match(/\\b(Yes|No|Up|Down)\\b/i);
+                if (outcomeMatch) {
+                    var outcome = outcomeMatch[1];
+                    var key = outcome.toLowerCase();
+                    if (!seenOutcomes[key]) {
+                        seenOutcomes[key] = outcome;
+                    }
+                }
+            }
+
+            for (var key in seenOutcomes) {
+                result.markets.push(seenOutcomes[key]);
+            }
+
+            return result;
+        """)
+
+        if resolution_data and isinstance(resolution_data, dict):
+            winning_outcome = resolution_data.get("winning_outcome")
+            all_outcomes = resolution_data.get("markets", [])
+
+            if winning_outcome or all_outcomes:
+                return {
+                    "winning_outcome": winning_outcome,
+                    "all_outcomes": all_outcomes
+                }
+    except Exception:
+        pass
+
+    return None
+
+
 def extract_market_data(driver):
     markets = []
-    
+
     try:
         market_data = driver.execute_script("""
             var markets = [];
             var seenOutcomes = {};
-            
+
             var allElements = document.querySelectorAll('button, [role="button"], div, span');
-            
+
             allElements.forEach(function(elem) {
                 var text = elem.textContent || elem.innerText;
                 if (!text || text.length < 3 || text.length > 100) return;
-                
+
                 text = text.trim();
-                
+
                 var outcomeMatch = text.match(/\\b(Up|Down|Yes|No)\\b/i);
                 if (!outcomeMatch) return;
-                
+
                 var outcome = outcomeMatch[1];
-                
+
                 var hasPrice = false;
                 var price = null;
-                
+
                 var priceMatch = text.match(/([\\d.]+)%/);
                 if (priceMatch) {
                     price = parseFloat(priceMatch[1]) / 100;
@@ -171,7 +253,7 @@ def extract_market_data(driver):
                         }
                     }
                 }
-                
+
                 if (hasPrice && price > 0 && price <= 1) {
                     var key = outcome.toLowerCase();
                     var existing = seenOutcomes[key];
@@ -187,11 +269,11 @@ def extract_market_data(driver):
                     }
                 }
             });
-            
+
             for (var key in seenOutcomes) {
                 markets.push(seenOutcomes[key]);
             }
-            
+
             return markets;
         """)
         
@@ -299,16 +381,45 @@ def extract_market_data(driver):
                 markets.append(market)
             except Exception:
                 continue
-    
+
     if not markets:
-        market = {
-            "outcome": "Unknown",
-            "current_price": 0.0,
-            "volume": 0.0,
-            "liquidity": 0.0,
-        }
-        markets.append(market)
-    
+        # Try to extract resolved outcome data
+        resolved_data = extract_resolved_outcome(driver)
+
+        if resolved_data:
+            winning_outcome = resolved_data.get("winning_outcome")
+            all_outcomes = resolved_data.get("all_outcomes", [])
+
+            # If we found a winning outcome, create markets with proper resolution
+            if winning_outcome:
+                for outcome in all_outcomes if all_outcomes else [winning_outcome]:
+                    is_winner = outcome.lower() == winning_outcome.lower()
+                    markets.append({
+                        "outcome": outcome,
+                        "current_price": 1.0 if is_winner else 0.0,
+                        "volume": 0.0,
+                        "liquidity": 0.0,
+                    })
+            # If we found outcomes but no clear winner, add them with 0 prices
+            elif all_outcomes:
+                for outcome in all_outcomes:
+                    markets.append({
+                        "outcome": outcome,
+                        "current_price": 0.0,
+                        "volume": 0.0,
+                        "liquidity": 0.0,
+                    })
+
+        # Last resort fallback
+        if not markets:
+            market = {
+                "outcome": "Unknown",
+                "current_price": 0.0,
+                "volume": 0.0,
+                "liquidity": 0.0,
+            }
+            markets.append(market)
+
     return markets
 
 
