@@ -20,7 +20,7 @@ if ! git rev-parse "$VERSION" >/dev/null 2>&1; then
     exit 1
 fi
 
-GITHUB_REPO="yourusername/polyparse"  # Update this with your actual repo
+GITHUB_REPO="pratyaypandey/polyparse"
 TARBALL_URL="https://github.com/${GITHUB_REPO}/archive/refs/tags/${VERSION}.tar.gz"
 
 echo "Downloading tarball from $TARBALL_URL"

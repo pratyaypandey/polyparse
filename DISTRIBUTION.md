@@ -74,7 +74,7 @@ mkdir -p Formula
 cp Formula/polyparse.rb homebrew-polyparse/Formula/
 
 # Users can then install with:
-brew tap yourusername/polyparse
+brew tap pratyaypandey/polyparse
 brew install polyparse
 ```
 
@@ -123,7 +123,7 @@ twine upload dist/*
 brew install polyparse
 
 # If using custom tap
-brew tap yourusername/polyparse
+brew tap pratyaypandey/polyparse
 brew install polyparse
 ```
 
@@ -137,7 +137,7 @@ pip install polyparse
 
 ```bash
 # Download and install from release
-curl -L https://github.com/yourusername/polyparse/archive/refs/tags/v0.1.0.tar.gz | tar xz
+curl -L https://github.com/pratyaypandey/polyparse/archive/refs/tags/v0.1.0.tar.gz | tar xz
 cd polyparse-0.1.0
 pip install .
 ```

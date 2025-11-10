@@ -21,7 +21,7 @@ A CLI tool that uses Selenium to scrape Polymarket event data, including histori
 brew install polyparse
 
 # Or from a custom tap
-brew tap yourusername/polyparse
+brew tap pratyaypandey/polyparse
 brew install polyparse
 ```
 
@@ -34,7 +34,7 @@ pip install polyparse
 ### From source
 
 ```bash
-git clone https://github.com/yourusername/polyparse.git
+git clone https://github.com/pratyaypandey/polyparse.git
 cd polyparse
 pip install -e .
 ```

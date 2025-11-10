@@ -71,7 +71,7 @@ mkdir -p homebrew-polyparse/Formula
 cp Formula/polyparse.rb homebrew-polyparse/Formula/
 
 # Users can then install with:
-# brew tap yourusername/polyparse
+# brew tap pratyaypandey/polyparse
 # brew install polyparse
 ```
 
@@ -81,14 +81,14 @@ Once set up, users can install via:
 
 ```bash
 # Homebrew (after tap setup)
-brew tap yourusername/polyparse
+brew tap pratyaypandey/polyparse
 brew install polyparse
 
 # PyPI (after first release)
 pip install polyparse
 
 # Direct from source
-git clone https://github.com/yourusername/polyparse.git
+git clone https://github.com/pratyaypandey/polyparse.git
 cd polyparse
 pip install -e .
 ```
@@ -97,7 +97,7 @@ pip install -e .
 
 ### 1. Update GitHub Repository URLs
 
-Search and replace `yourusername/polyparse` with your actual GitHub username/repo in:
+Search and replace `pratyaypandey/polyparse` with your actual GitHub username/repo in:
 - `pyproject.toml`
 - `Formula/polyparse.rb`
 - `scripts/generate_formula.sh`

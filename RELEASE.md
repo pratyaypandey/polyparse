@@ -26,7 +26,7 @@ git push origin "v${VERSION}"
 #    - Publish to PyPI (if configured)
 
 # 3. Wait for the release workflow to complete
-# Check: https://github.com/yourusername/polyparse/actions
+# Check: https://github.com/pratyaypandey/polyparse/actions
 ```
 
 ## Update Homebrew Formula

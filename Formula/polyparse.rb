@@ -2,8 +2,8 @@ class Polyparse < Formula
   include Language::Python::Virtualenv
 
   desc "CLI tool to scrape Polymarket event data using Selenium"
-  homepage "https://github.com/yourusername/polyparse"
-  url "https://github.com/yourusername/polyparse/archive/refs/tags/v0.1.0.tar.gz"
+  homepage "https://github.com/pratyaypandey/polyparse"
+  url "https://github.com/pratyaypandey/polyparse/archive/refs/tags/v0.1.0.tar.gz"
   sha256 "" # This will be calculated automatically by Homebrew
   license "MIT"
 
